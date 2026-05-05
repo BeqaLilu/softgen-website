@@ -1,0 +1,81 @@
+import type { Config } from 'tailwindcss';
+
+export default {
+  darkMode: ['class', "[data-theme='dark']"],
+  content: [
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './sections/**/*.{ts,tsx}',
+    './content/**/*.{ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        purple: {
+          50: '#F5F2FF',
+          100: '#EDE9FF',
+          200: '#DBD3FF',
+          300: '#BDB0FF',
+          400: '#8E78F0',
+          500: '#4F3EDB',
+          600: '#4232C2',
+          700: '#362AA0',
+          800: '#2A2080',
+          900: '#1F1860',
+        },
+        ink: {
+          50: '#FAF8FC',
+          100: '#F2EFF6',
+          200: '#E6E2EF',
+          300: '#C4BED6',
+          400: '#948CB0',
+          500: '#6B638A',
+          600: '#4A436A',
+          700: '#322B4D',
+          800: '#1B1730',
+          900: '#0E0B1A',
+        },
+        bg: 'var(--bg)',
+        'bg-soft': 'var(--bg-soft)',
+        'bg-deep': 'var(--bg-deep)',
+        surface: 'var(--surface)',
+        'surface-elev': 'var(--surface-elev)',
+        border: 'var(--border)',
+        'border-strong': 'var(--border-strong)',
+        primary: 'var(--primary)',
+        'primary-soft': 'var(--primary-soft)',
+        'primary-deep': 'var(--primary-deep)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-tertiary': 'var(--text-tertiary)',
+      },
+      fontFamily: {
+        display: ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
+      borderRadius: {
+        sm: '6px',
+        md: '8px',
+        lg: '12px',
+        xl: '20px',
+        '2xl': '28px',
+      },
+      boxShadow: {
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        purple: 'var(--shadow-purple)',
+      },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'in-out-quint': 'cubic-bezier(0.65, 0, 0.35, 1)',
+      },
+      maxWidth: {
+        container: '1280px',
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;

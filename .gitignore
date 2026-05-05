@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.vercel/
+.env
+.env.development
+.env.production
+.env*.local
+*.tsbuildinfo
+next-env.d.ts.bak
+_safepoints/
+
+# bundled prototype extraction artifacts
+handoff/_extract/
+handoff/extract.cjs

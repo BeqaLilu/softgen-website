@@ -1,0 +1,81 @@
+# Production compose for softgen.ge.
+#
+# Reads `.env.production` from the same directory (the deploy host should
+# create that from .env.production.example). Internal services talk over
+# the docker-internal network; only the app's port is published to the host.
+#
+# Bring up:    docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+# Bring down:  docker compose -f docker-compose.prod.yml --env-file .env.production down
+# Migrate:     docker compose -f docker-compose.prod.yml --env-file .env.production exec app pnpm db:push
+# Seed:        docker compose -f docker-compose.prod.yml --env-file .env.production exec app pnpm db:seed
+# Logs:        docker compose -f docker-compose.prod.yml --env-file .env.production logs -f app
+# Wipe data:   docker compose -f docker-compose.prod.yml --env-file .env.production down -v   ⚠ destroys DB + uploads
+
+# Explicit project name keeps prod containers + volumes isolated from
+# docker-compose.dev.yml (which auto-uses the directory name `website`).
+# Without this, running prod alongside dev would clobber the dev DB.
+name: softgen-prod
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: softgen-pg-prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-softgen}
+      POSTGRES_USER: ${POSTGRES_USER:-softgen}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - softgen-pg-prod-data:/var/lib/postgresql/data
+    # Postgres is ONLY reachable on the internal docker network; never published.
+    # If the dev needs to inspect from the host, use:
+    #   docker exec -it softgen-pg-prod psql -U softgen
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-softgen} -d ${POSTGRES_DB:-softgen}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: softgen-web:latest
+    container_name: softgen-web-prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Inside the docker network, Postgres is on hostname `postgres` port 5432.
+      # If DATABASE_URL is also set in the .env file it overrides this — we
+      # default it here so the container can boot even if the operator forgot.
+      DATABASE_URL: ${DATABASE_URL:-postgres://${POSTGRES_USER:-softgen}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-softgen}?sslmode=disable}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?NEXTAUTH_SECRET is required}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?NEXTAUTH_URL is required}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-${NEXTAUTH_URL}}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Softgen <hello@softgen.ge>}
+      LEAD_NOTIFY_TO: ${LEAD_NOTIFY_TO:-sales@softgen.ge}
+      APPLICATION_NOTIFY_TO: ${APPLICATION_NOTIFY_TO:-careers@softgen.ge}
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      NODE_ENV: production
+    ports:
+      - "${APP_PORT:-3005}:3005"
+    volumes:
+      # When BLOB_READ_WRITE_TOKEN is empty, CV/image uploads land on disk
+      # under /app/public/uploads. Mounting a named volume there means
+      # uploads survive container restarts and image rebuilds.
+      - softgen-uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3005/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+volumes:
+  softgen-pg-prod-data:
+  softgen-uploads:

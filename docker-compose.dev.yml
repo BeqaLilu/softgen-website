@@ -1,0 +1,30 @@
+# Local Postgres for softgen.ge dev.
+#
+# Port 5440 chosen to avoid clashing with the user's other projects
+# (avto-postgres on 5433, warehouse on 5432).
+#
+# Bring up:    docker compose -f docker-compose.dev.yml up -d
+# Bring down:  docker compose -f docker-compose.dev.yml down
+# Wipe data:   docker compose -f docker-compose.dev.yml down -v
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: softgen-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: softgen
+      POSTGRES_USER: softgen
+      POSTGRES_PASSWORD: softgen_dev
+    ports:
+      - "5440:5432"
+    volumes:
+      - softgen-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U softgen -d softgen"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  softgen-pg-data:
