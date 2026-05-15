@@ -42,6 +42,15 @@ try {
 
 const ssl = /sslmode=disable/.test(url) ? false : 'require';
 const sql = postgres(url, { ssl, max: 1, prepare: false, connect_timeout: 10 });
+const PLACEHOLDER_PASSWORDS = new Set(['', 'changeme-now', 'CHANGE_ME', 'CHANGE_ME_FIRST_RUN']);
+
+function requireSeedPassword(password) {
+  const value = password?.trim() ?? '';
+  if (process.env.NODE_ENV === 'production' && PLACEHOLDER_PASSWORDS.has(value)) {
+    throw new Error('SEED_ADMIN_PASSWORD must be set to a strong non-placeholder value before creating the production admin user.');
+  }
+  return value || 'changeme-now';
+}
 
 async function main() {
   console.log('Seeding…');
@@ -181,9 +190,9 @@ async function main() {
 
   // admin
   const email = process.env.SEED_ADMIN_EMAIL ?? 'levan@softgen.ge';
-  const password = process.env.SEED_ADMIN_PASSWORD ?? 'changeme-now';
   const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
   if (existing.length === 0) {
+    const password = requireSeedPassword(process.env.SEED_ADMIN_PASSWORD);
     const hash = await bcrypt.hash(password, 10);
     await sql`
       INSERT INTO users (email, password_hash, name, role)

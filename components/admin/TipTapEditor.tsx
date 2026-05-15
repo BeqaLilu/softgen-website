@@ -173,8 +173,8 @@ export function TipTapEditor({
       <EditorContent editor={editor} placeholder={placeholder} />
       <style jsx global>{`
         .tiptap p { margin: 0 0 12px; line-height: 1.6; }
-        .tiptap h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 20px 0 10px; }
-        .tiptap h3 { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin: 16px 0 8px; }
+        .tiptap h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; margin: 20px 0 10px; }
+        .tiptap h3 { font-family: var(--font-display); font-weight: 600; font-size: 18px; margin: 16px 0 8px; }
         .tiptap ul, .tiptap ol { margin: 0 0 12px; padding-left: 22px; }
         .tiptap li { margin-bottom: 4px; }
         .tiptap blockquote { border-left: 3px solid var(--primary); padding-left: 14px; color: var(--text-secondary); margin: 12px 0; }

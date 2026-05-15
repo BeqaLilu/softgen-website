@@ -35,7 +35,7 @@ export function Logo({ size = 28, lang = 'en' }: { size?: number; lang?: Locale 
       <span
         style={{
           fontFamily: 'var(--font-display)',
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 18,
           letterSpacing: '-0.02em',
         }}

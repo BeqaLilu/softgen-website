@@ -223,7 +223,7 @@ export function BrandSplash() {
 
         .brand-splash__wordmark {
           font-family: var(--font-display);
-          font-weight: 700;
+          font-weight: 600;
           font-size: 28px;
           letter-spacing: -0.02em;
           color: var(--text-primary);

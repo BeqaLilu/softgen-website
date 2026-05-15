@@ -86,7 +86,7 @@ export function PartnersClient({ rows }: { rows: ExistingPartner[] }) {
           padding: '0 32px',
         }}
       >
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, letterSpacing: '-0.02em', margin: 0 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 24, letterSpacing: '-0.02em', margin: 0 }}>
           Partners
         </h1>
         <button

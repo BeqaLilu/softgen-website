@@ -16,7 +16,7 @@ This document is the only thing you need to bring softgen.ge live on a real doma
 | Public site | `/[lang]/...` for `en` (default) and `ka` |
 | Admin panel | `/admin/*`, gated by middleware + server actions |
 | File uploads | Local disk by default (`public/uploads`, mounted volume), Vercel Blob optional |
-| Email | Resend optional — falls back to stdout logging |
+| Email | Resend in production; console fallback is development-only |
 
 ---
 
@@ -56,6 +56,8 @@ curl -I http://localhost:3005/en
 
 The app is now live on port 3005. Front it with nginx/Caddy/Traefik for TLS + the real domain (snippets below).
 
+Production migrations are SQL files in `db/migrations` applied by filename through `db/migrate.mjs`. Do not use `pnpm db:push` against production databases.
+
 ---
 
 ## 2. Reverse proxy + TLS
@@ -88,6 +90,9 @@ server {
     return 301 https://softgen.ge$request_uri;
 }
 
+# Put this in nginx's `http` block, outside the server blocks.
+limit_req_zone $binary_remote_addr zone=softgen_api:10m rate=10r/m;
+
 server {
     listen 443 ssl http2;
     server_name softgen.ge;
@@ -106,6 +111,16 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_read_timeout 60s;
+    }
+
+    location ~ ^/api/(leads|applications|auth/) {
+        limit_req zone=softgen_api burst=5 nodelay;
+        proxy_pass http://127.0.0.1:3005;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
@@ -158,10 +173,10 @@ Wire this into cron:
 
 ### Backup uploaded files
 
-If running with the disk fallback (no `BLOB_READ_WRITE_TOKEN`), the named volume `softgen-uploads` holds CVs and images. Back up via:
+If running with the disk fallback (no `BLOB_READ_WRITE_TOKEN`), the named volume `softgen-uploads` holds CVs and images. With the explicit Compose project name, Docker creates it as `softgen-prod_softgen-uploads`. Back up via:
 
 ```bash
-docker run --rm -v softgen-web_softgen-uploads:/data -v $(pwd):/backup alpine \
+docker run --rm -v softgen-prod_softgen-uploads:/data -v $(pwd):/backup alpine \
   tar czf /backup/uploads-$(date +%F).tar.gz -C /data .
 ```
 
@@ -193,10 +208,11 @@ docker compose -f docker-compose.prod.yml --env-file .env.production exec postgr
 - [ ] Generate `NEXTAUTH_SECRET` with `openssl rand -base64 32`
 - [ ] Set `NEXTAUTH_URL` and `NEXT_PUBLIC_SITE_URL` to the real https URL
 - [ ] Set `SEED_ADMIN_PASSWORD` to something strong, sign in once, then change it from `/admin/users` and remove `SEED_ADMIN_PASSWORD` from `.env.production`
-- [ ] Get a `RESEND_API_KEY` (free tier: 3 000 emails/month). Without it, contact-form / job-application emails are only logged to stdout.
+- [ ] Get a `RESEND_API_KEY` (free tier: 3 000 emails/month). In production, contact-form / job-application emails fail closed if the key is missing.
 - [ ] Verify domain ownership in Resend so emails go from `hello@softgen.ge` not the resend.dev sandbox domain.
 - [ ] (Optional) Set `BLOB_READ_WRITE_TOKEN` if you'll run multiple app instances behind a load balancer. Single-instance deploys can keep the disk fallback.
 - [ ] Adjust the daily backup cron to a path that's actually backed up off-host.
+- [ ] Keep reverse-proxy rate limits enabled for `/api/leads`, `/api/applications`, and auth callbacks.
 - [ ] Confirm `https://softgen.ge/api/health` returns `{"ok":true,"db":"up"}` from outside the network.
 - [ ] Confirm `https://softgen.ge/sitemap.xml` and `https://softgen.ge/robots.txt` return the right hosts.
 - [ ] Submit `https://softgen.ge/sitemap.xml` to Google Search Console.
@@ -209,8 +225,8 @@ docker compose -f docker-compose.prod.yml --env-file .env.production exec postgr
 |---|---|
 | `softgen-web-prod` is `unhealthy`, logs say `DATABASE_URL is not set` | Check `.env.production` exists and `--env-file .env.production` is in the compose command |
 | 500 on every page after a deploy | `docker compose -f docker-compose.prod.yml --env-file .env.production logs app \| tail -50` — usually a missing env var |
-| Login at `/admin/login` gives "Invalid credentials" but you're sure of the password | Either the seed didn't run (`pnpm db:seed`), or the user really has a different hash. See "Reset an admin password" above |
-| `/api/health` returns 503 with `db_error` | Postgres container is down or unreachable. Check `docker compose ps postgres` and its logs |
+| Login at `/admin/login` gives "Invalid credentials" but you're sure of the password | Either the seed didn't run (`docker compose -f docker-compose.prod.yml --env-file .env.production exec app node db/seed.mjs`), or the user really has a different hash. See "Reset an admin password" above |
+| `/api/health` returns 503 with `"db":"down"` | Postgres container is down or unreachable. Check `docker compose ps postgres` and its logs |
 | New articles edited in admin don't show up on `/news` immediately | Per-list pages are cached for 60 s in `lib/dbContent.ts`. Either wait, or wire a `revalidateTag('articles')` call into the admin save action |
 | Container can't write to `/app/public/uploads` | Volume permissions — ensure the named volume isn't bound to a host path with restrictive ownership |
 | Image too large / build slow | The `.next/cache` is in the build context; if the local repo has a stale `.next/`, run `rm -rf .next` before `docker compose up --build` |
@@ -226,7 +242,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production exec postgr
 │                  Caddy / nginx (host network)                   │
 │                              │ http://localhost:3005            │
 │  ┌───────────────────────────┴──────────────────────────────┐   │
-│  │  docker network: softgen-web_default (internal only)     │   │
+│  │  docker network: softgen-prod_default (internal only)    │   │
 │  │                                                          │   │
 │  │   ┌─────────────────┐         ┌──────────────────────┐  │   │
 │  │   │ softgen-web-prod │  ───►  │ softgen-pg-prod      │  │   │
@@ -248,7 +264,7 @@ Code locations the dev cares about:
 - `lib/auth.ts` — next-auth config + JWT shape (sessions are JWT, not DB-backed)
 - `lib/email.ts`, `lib/blob.ts` — Resend + Vercel Blob with the dev fallbacks
 - `lib/settings.ts` — runtime accessor for `pages.settings` (notify-to, SEO defaults)
-- `db/schema.ts` — Drizzle schema; edit + `pnpm db:push` to migrate
+- `db/schema.ts` — Drizzle schema; generate SQL migrations for production, then run `node db/migrate.mjs`
 - `Dockerfile`, `docker-compose.prod.yml` — what you're reading this doc for
 
 For anything else, see [`NEXT_STEPS.md`](./NEXT_STEPS.md) which catalogues every Phase of the build.

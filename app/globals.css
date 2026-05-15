@@ -60,10 +60,12 @@
   --status-lost-fg:      var(--text-tertiary);
   --status-lost-bg:      rgba(138, 130, 168, 0.15);
 
-  /* Type — wired to next/font CSS variables (see app/[lang]/layout.tsx) */
-  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-body:    var(--font-inter),   ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono:    var(--font-jbmono),  ui-monospace, "SF Mono", Menlo, monospace;
+  /* Type — Latin via next/font, Georgian via native/system fallback. */
+  --display: "Inter Tight", var(--font-inter-tight), "BPG Nino Mtavruli", "Noto Sans Georgian", "FiraGO", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", var(--font-jbmono), ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: var(--display);
+  --font-body:    var(--display);
+  --font-mono:    var(--mono);
 
   /* Radii */
   --radius-sm: 6px;
@@ -127,7 +129,7 @@ body {
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "ss01", "cv11";
@@ -150,13 +152,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ─── Type utilities ─── */
-.font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
-.font-mono    { font-family: var(--font-mono); }
+.font-display { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.02em; }
+.font-mono    { font-family: var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   margin: 0;
   line-height: 1.05;
   color: var(--text-primary);
@@ -164,7 +166,7 @@ h1, h2, h3, h4 {
 
 .h-display {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   font-size: clamp(48px, 6.5vw, 88px);
   line-height: 1.02;
   letter-spacing: -0.035em;
@@ -176,7 +178,7 @@ h1, h2, h3, h4 {
 
 .lead {
   font-size: clamp(17px, 1.4vw, 20px);
-  line-height: 1.55;
+  line-height: 1.65;
   color: var(--text-secondary);
   text-wrap: pretty;
   max-width: 60ch;
@@ -235,10 +237,10 @@ h1, h2, h3, h4 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-display);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-weight: 500;
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--primary);
 }
@@ -258,10 +260,11 @@ h1, h2, h3, h4 {
   border-radius: var(--radius-full);
   background: var(--primary-soft);
   color: var(--primary);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 [data-theme="dark"] .chip { color: #C4B7FF; }
 .chip-outline {

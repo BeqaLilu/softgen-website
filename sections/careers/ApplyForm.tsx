@@ -71,7 +71,7 @@ export function ApplyForm({ lang, jobSlug }: { lang: Locale; jobSlug: string }) 
           style={{
             color: 'var(--primary)',
             fontFamily: 'var(--font-display)',
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 16,
           }}
         >

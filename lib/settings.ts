@@ -17,8 +17,15 @@ import { db } from '@/db';
 import { pages } from '@/db/schema';
 import { DEFAULT_SETTINGS, type SiteSettings } from '@/app/admin/settings/schema';
 
+const IS_PRODUCTION_BUILD = process.env.NEXT_PHASE === 'phase-production-build';
+const QUERY_DB_DURING_BUILD = process.env.SOFTGEN_QUERY_DB_DURING_BUILD === '1';
+
 export const getSettings = cache(
   async (): Promise<SiteSettings> => {
+    if (IS_PRODUCTION_BUILD && !QUERY_DB_DURING_BUILD) {
+      return DEFAULT_SETTINGS;
+    }
+
     try {
       const [row] = await db
         .select({ content: pages.content })

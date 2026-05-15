@@ -60,8 +60,8 @@ export function isSimpleBlocks(value: unknown): value is SimpleBlock[] {
  */
 const PROSE_CSS = `
   .body-prose p { font-size: 17px; line-height: 1.75; color: var(--text-primary); margin: 0 0 24px; text-wrap: pretty; }
-  .body-prose h2 { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 2vw, 28px); line-height: 1.2; letter-spacing: -0.025em; margin: 48px 0 16px; color: var(--text-primary); }
-  .body-prose h3 { font-family: var(--font-display); font-weight: 700; font-size: 20px; margin: 32px 0 12px; color: var(--text-primary); }
+  .body-prose h2 { font-family: var(--font-display); font-weight: 600; font-size: clamp(22px, 2vw, 28px); line-height: 1.2; letter-spacing: -0.025em; margin: 48px 0 16px; color: var(--text-primary); }
+  .body-prose h3 { font-family: var(--font-display); font-weight: 600; font-size: 20px; margin: 32px 0 12px; color: var(--text-primary); }
   .body-prose ul, .body-prose ol { font-size: 17px; line-height: 1.75; padding-left: 22px; margin: 0 0 24px; color: var(--text-primary); }
   .body-prose li { margin-bottom: 6px; }
   .body-prose blockquote { border-left: 3px solid var(--primary); padding-left: 16px; margin: 24px 0; color: var(--text-secondary); font-style: italic; }

@@ -158,7 +158,7 @@ export function AdminSidebar() {
             alignItems: 'center',
             justifyContent: 'center',
             fontFamily: 'var(--font-display)',
-            fontWeight: 700,
+            fontWeight: 600,
             fontSize: 12,
           }}
         >

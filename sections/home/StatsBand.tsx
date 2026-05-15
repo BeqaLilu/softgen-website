@@ -106,7 +106,7 @@ function StatCell({
         className="font-display"
         style={{
           fontSize: 'clamp(38px, 4vw, 58px)',
-          fontWeight: 700,
+          fontWeight: 600,
           letterSpacing: '-0.035em',
           lineHeight: 1,
           color: 'var(--text-primary)',

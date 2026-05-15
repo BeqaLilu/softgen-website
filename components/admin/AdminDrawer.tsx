@@ -73,7 +73,7 @@ export function AdminDrawer({
             <Dialog.Title
               style={{
                 fontFamily: 'var(--font-display)',
-                fontWeight: 700,
+                fontWeight: 600,
                 fontSize: 20,
                 letterSpacing: '-0.02em',
                 margin: 0,

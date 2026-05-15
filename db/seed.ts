@@ -30,6 +30,16 @@ import {
 } from './schema';
 import { CONTENT } from '../content/static';
 
+const PLACEHOLDER_PASSWORDS = new Set(['', 'changeme-now', 'CHANGE_ME', 'CHANGE_ME_FIRST_RUN']);
+
+function requireSeedPassword(password: string | undefined): string {
+  const value = password?.trim() ?? '';
+  if (process.env.NODE_ENV === 'production' && PLACEHOLDER_PASSWORDS.has(value)) {
+    throw new Error('SEED_ADMIN_PASSWORD must be set to a strong non-placeholder value before creating the production admin user.');
+  }
+  return value || 'changeme-now';
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     console.error('DATABASE_URL is not set. Copy .env.example → .env.local and fill it in.');
@@ -228,12 +238,12 @@ async function main() {
 
   /* ─── Admin user (only insert if missing) ─── */
   const email = process.env.SEED_ADMIN_EMAIL ?? 'levan@softgen.ge';
-  const password = process.env.SEED_ADMIN_PASSWORD ?? 'changeme-now';
   const existing = await db
     .select({ id: users.id })
     .from(users)
     .where(sql`${users.email} = ${email}`);
   if (existing.length === 0) {
+    const password = requireSeedPassword(process.env.SEED_ADMIN_PASSWORD);
     const hash = await bcrypt.hash(password, 10);
     await db.insert(users).values({
       email,

@@ -47,7 +47,7 @@ export function SettingsClient({ initial }: { initial: SiteSettings }) {
       {/* General */}
       <section className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <header>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 4 }}>General</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 18, marginBottom: 4 }}>General</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Company info and contact channels.</p>
         </header>
         {txt('Company name', s.general.companyName, (v) => setG('companyName', v))}
@@ -64,7 +64,7 @@ export function SettingsClient({ initial }: { initial: SiteSettings }) {
       {/* SEO */}
       <section className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <header>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 4 }}>SEO defaults</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 18, marginBottom: 4 }}>SEO defaults</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>Used when a page does not provide its own title or description.</p>
         </header>
         <BilingualField
@@ -90,7 +90,7 @@ export function SettingsClient({ initial }: { initial: SiteSettings }) {
       {/* Integrations */}
       <section className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
         <header>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, marginBottom: 4 }}>Integrations</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 18, marginBottom: 4 }}>Integrations</h2>
           <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
             API keys (RESEND_API_KEY, BLOB_READ_WRITE_TOKEN, etc.) live in env vars, not here. This is for non-secret config only.
           </p>

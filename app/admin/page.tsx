@@ -122,7 +122,7 @@ export default async function AdminDashboard() {
                 <div
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: 36,
                     letterSpacing: '-0.025em',
                     fontVariantNumeric: 'tabular-nums',

@@ -25,7 +25,7 @@ export function AdminTopbar({
       <h1
         style={{
           fontFamily: 'var(--font-display)',
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 24,
           letterSpacing: '-0.02em',
           color: 'var(--text-primary)',

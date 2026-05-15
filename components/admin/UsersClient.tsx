@@ -93,7 +93,7 @@ export function UsersClient({ rows, currentUserId }: { rows: ExistingUser[]; cur
           padding: '0 32px',
         }}
       >
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 24, letterSpacing: '-0.02em', margin: 0 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 24, letterSpacing: '-0.02em', margin: 0 }}>
           Users
         </h1>
         <button

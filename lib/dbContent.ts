@@ -35,15 +35,20 @@ import {
   type BodyBlock,
 } from '@/content/static';
 
+const IS_PRODUCTION_BUILD = process.env.NEXT_PHASE === 'phase-production-build';
+const QUERY_DB_DURING_BUILD = process.env.SOFTGEN_QUERY_DB_DURING_BUILD === '1';
+
 /** Try a DB query; on any failure return the static fallback. */
 async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  if (IS_PRODUCTION_BUILD && !QUERY_DB_DURING_BUILD) {
+    return fallback;
+  }
+
   try {
     return await fn();
   } catch (err) {
-    if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn(`[dbContent:${label}] DB unreachable, using static fallback —`, err instanceof Error ? err.message : err);
-    }
+    // eslint-disable-next-line no-console
+    console.warn(`[dbContent:${label}] DB unavailable, using static fallback`, err instanceof Error ? err.message : err);
     return fallback;
   }
 }

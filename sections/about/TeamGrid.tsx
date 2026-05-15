@@ -34,7 +34,7 @@ export function TeamGrid({
                 <h4
                   style={{
                     fontFamily: 'var(--font-display)',
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: 19,
                     marginBottom: 4,
                   }}

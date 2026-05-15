@@ -7,27 +7,17 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-/**
- * Liveness + readiness probe.
- *
- *  - Liveness  → process is up (always 200 from this handler).
- *  - Readiness → DB is reachable (200 if `select 1` succeeds, 503 otherwise).
- *
- * Used by:
- *  - Dockerfile HEALTHCHECK (sees 200/503 only, doesn't read body)
- *  - Reverse-proxy / orchestrator probes
- *  - Manual `curl http://host/api/health`
- */
+/** Combined readiness probe: process is up and DB accepts `select 1`. */
 export async function GET() {
   const startedAt = process.uptime();
   let dbOk = false;
-  let dbError: string | undefined;
 
   try {
     await db.execute(sql`select 1`);
     dbOk = true;
   } catch (err) {
-    dbError = err instanceof Error ? err.message : 'unknown';
+    // eslint-disable-next-line no-console
+    console.error('[api/health] database check failed', err);
   }
 
   return NextResponse.json(
@@ -35,7 +25,6 @@ export async function GET() {
       ok: dbOk,
       uptime_s: Math.round(startedAt),
       db: dbOk ? 'up' : 'down',
-      ...(dbError ? { db_error: dbError } : {}),
       time: new Date().toISOString(),
     },
     { status: dbOk ? 200 : 503 }

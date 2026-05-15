@@ -4,8 +4,10 @@ import { db } from '@/db';
 import { leads } from '@/db/schema';
 import { sendEmail, esc } from '@/lib/email';
 import { getSettings } from '@/lib/settings';
+import { rateLimit } from '@/lib/rateLimit';
 
 export const runtime = 'nodejs';
+const LEAD_LIMIT = { keyPrefix: 'leads', limit: 8, windowMs: 60 * 1000 };
 
 const LeadSchema = z.object({
   name: z.string().min(1, 'name is required'),
@@ -17,6 +19,9 @@ const LeadSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const limited = rateLimit(req, LEAD_LIMIT);
+  if (limited) return limited;
+
   let json: unknown;
   try {
     json = await req.json();
@@ -33,8 +38,7 @@ export async function POST(req: Request) {
   }
   const data = parsed.data;
 
-  // Insert. If DATABASE_URL is missing we surface a clear 503 — better
-  // than a 500 with no actionable message during pre-deployment dev.
+  // Insert first so the public API never claims success for lost leads.
   try {
     const [row] = await db
       .insert(leads)
@@ -54,7 +58,7 @@ export async function POST(req: Request) {
     // fallback for first-boot before settings are populated.
     const settings = await getSettings();
     const notifyTo = settings.general.salesEmail || process.env.LEAD_NOTIFY_TO || 'sales@softgen.ge';
-    void sendEmail({
+    const email = await sendEmail({
       to: notifyTo,
       replyTo: data.email,
       subject: `New lead: ${data.name}${data.company ? ` (${data.company})` : ''}`,
@@ -70,12 +74,18 @@ export async function POST(req: Request) {
         <p><a href="${process.env.NEXTAUTH_URL ?? ''}/admin/leads/${row.id}">Open in admin</a></p>
       `,
     });
+    if (!email.ok) {
+      // eslint-disable-next-line no-console
+      console.error('[api/leads] notification email failed', { id: row.id });
+    }
 
     return NextResponse.json({ ok: true, id: row.id }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'unknown';
     if (msg.includes('DATABASE_URL')) {
-      return NextResponse.json({ ok: false, error: 'database_not_configured', message: msg }, { status: 503 });
+      // eslint-disable-next-line no-console
+      console.error('[api/leads] database not configured', err);
+      return NextResponse.json({ ok: false, error: 'database_unavailable' }, { status: 503 });
     }
     // eslint-disable-next-line no-console
     console.error('[api/leads] failed', err);

@@ -1,25 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Inter_Tight, JetBrains_Mono } from 'next/font/google';
 import { themeBootstrapScript } from '@/components/theme/ThemeProvider';
 import { splashBootstrapScript } from '@/components/visual/BrandSplash';
 import './globals.css';
 
-/* Per build-prompt §"Build order" Phase 1.3: Plus Jakarta Sans (display),
- * Inter (body), JetBrains Mono (numerics), Latin + Georgian subsets. The
- * spec asks for next/font/local with the prototype's woff2 files; that
- * swap is documented in NEXT_STEPS.md and is a drop-in replacement —
- * the CSS variable names below stay identical. */
-const inter = Inter({
+/* Inter Tight handles Latin display/body copy; Georgian text falls through to
+ * the system Georgian stack declared in globals.css. */
+const interTight = Inter_Tight({
   subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['500', '600', '700'],
-  variable: '--font-jakarta',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-inter-tight',
   display: 'swap',
 });
 
@@ -38,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jakarta.variable} ${jbmono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${interTight.variable} ${jbmono.variable}`} suppressHydrationWarning>
       <head>
         {/* Set data-theme before paint to avoid a flash of light theme. */}
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />

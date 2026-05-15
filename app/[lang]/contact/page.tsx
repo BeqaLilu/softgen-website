@@ -71,7 +71,7 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
                   }}
                 >
                   <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 18 }}>
                       {o.city[l]}
                     </div>
                     <div

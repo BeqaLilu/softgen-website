@@ -14,7 +14,7 @@ for handover (Docker, prod compose, runbook).
 - `app/globals.css` carries the full design-token system from `handoff/design-tokens.md` + the prototype's `styles.css`.
 - Dark mode default; `ThemeProvider` persists in `localStorage`; inline boot script sets `data-theme` before paint (no FOUC).
 - `tailwind.config.ts` extends with the purple/ink palettes, semantic vars, fonts, radii, shadows, easings, 1280px container.
-- Fonts via `next/font/google` (Plus Jakarta Sans, Inter, JetBrains Mono) — Latin + Latin-ext for Georgian.
+- Fonts via `next/font/google` (Inter Tight, JetBrains Mono) — Latin uses Inter Tight; Georgian falls through to native Georgian system fonts.
 - `content/static.ts` carries the bilingual `CONTENT` blob — every visible string in EN + KA, transcribed from the prototype's `content.jsx`.
 
 ### Phase 2 — Public pages ✅
