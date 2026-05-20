@@ -8,6 +8,7 @@ node_modules/
 *.tsbuildinfo
 next-env.d.ts.bak
 _safepoints/
+SOFTGEN_PRODUCTION_HANDOFF.md
 
 # bundled prototype extraction artifacts
 handoff/_extract/
